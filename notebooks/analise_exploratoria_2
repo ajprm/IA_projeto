@@ -1,0 +1,217 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Análise Exploratória - Detecção de Fraude em Cartão de Crédito\n",
+    "\n",
+    "**Disciplina:** Inteligência Artificial – 7ºJ SI - Noite (Prof. Dr. Leandro Zerbinatti)\n",
+    "\n",
+    "**Integrantes do grupo:** Eduarda | Sara | Anna\n",
+    "\n",
+    "**Autora deste arquivo:** Sara\n",
+    "\n",
+    "**Síntese do conteúdo:** Este notebook contém a parte da análise exploratória: histogramas das variáveis `Amount` e `Time`, e matriz de correlação entre as variáveis do dataset.\n",
+    "\n",
+    "**Histórico de alterações:**\n",
+    "\n",
+    "| Data | Autor | Descrição |\n",
+    "|------|-------|-----------|\n",
+    "| 2026-09-13 | Sara | Criação do notebook: histogramas de Amount/Time e matriz de correlação |\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 1 - Importação das bibliotecas"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "\n",
+    "sns.set(style=\"whitegrid\")\n",
+    "plt.rcParams['figure.figsize'] = (10, 5)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 2 - Carregamento do dataset\n",
+    "\n",
+    "Dataset público: [Credit Card Fraud Detection - Kaggle (mlg-ulb/creditcardfraud)](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)\n",
+    "\n",
+    "> Obs.: baixe o arquivo `creditcard.csv` do Kaggle e coloque na mesma pasta deste notebook (ou ajuste o caminho abaixo)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('creditcard.csv')\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3. Histograma da variável `Amount`\n",
+    "\n",
+    "Representa o valor monetário de cada transação. É importante observar a assimetria da distribuição (muitas transações de baixo valor e poucas de valor alto)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.figure(figsize=(10, 5))\n",
+    "sns.histplot(df['Amount'], bins=100, kde=False, color='steelblue')\n",
+    "plt.title('Distribuição da variável Amount (valor da transação)')\n",
+    "plt.xlabel('Amount')\n",
+    "plt.ylabel('Frequência')\n",
+    "plt.show()\n",
+    "\n",
+    "print(df['Amount'].describe())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Como a distribuição costuma ser bastante concentrada em valores baixos, vale plotar também em escala logarítmica para visualizar melhor a cauda da distribuição:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.figure(figsize=(10, 5))\n",
+    "sns.histplot(df['Amount'], bins=100, color='steelblue')\n",
+    "plt.yscale('log')\n",
+    "plt.title('Distribuição da variável Amount (escala logarítmica no eixo Y)')\n",
+    "plt.xlabel('Amount')\n",
+    "plt.ylabel('Frequência (log)')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 4. Histograma da variável `Time`\n",
+    "\n",
+    "Representa o tempo, em segundos, decorrido entre cada transação e a primeira transação do dataset (o dataset cobre um período de 2 dias)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.figure(figsize=(10, 5))\n",
+    "sns.histplot(df['Time'], bins=100, color='darkorange')\n",
+    "plt.title('Distribuição da variável Time (segundos desde a primeira transação)')\n",
+    "plt.xlabel('Time (segundos)')\n",
+    "plt.ylabel('Frequência')\n",
+    "plt.show()\n",
+    "\n",
+    "print(df['Time'].describe())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "É possível notar dois picos distintos ao longo do tempo, que correspondem aproximadamente aos dois dias cobertos pelo dataset, com maior volume de transações durante o período diurno de cada dia."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 5. Matriz de Correlação\n",
+    "\n",
+    "Como as variáveis V1 a V28 já passaram por uma transformação PCA, espera-se baixa correlação entre elas (o PCA gera componentes ortogonais/não correlacionados). O objetivo aqui é confirmar isso e observar se `Amount`, `Time` ou `Class` apresentam alguma correlação relevante com as demais variáveis."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corr = df.corr()\n",
+    "\n",
+    "plt.figure(figsize=(18, 14))\n",
+    "sns.heatmap(corr, cmap='coolwarm', center=0, linewidths=0.3, cbar_kws={'shrink': 0.8})\n",
+    "plt.title('Matriz de correlação entre as variáveis do dataset')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Para facilitar a leitura, vale destacar especificamente a correlação de cada variável com a variável-alvo `Class`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corr_class = corr['Class'].sort_values(ascending=False)\n",
+    "print(corr_class)\n",
+    "\n",
+    "plt.figure(figsize=(8, 10))\n",
+    "corr_class.drop('Class').plot(kind='barh', color='seagreen')\n",
+    "plt.title('Correlação de cada variável com a variável Class')\n",
+    "plt.xlabel('Coeficiente de correlação')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Observações preliminares\n",
+    "\n",
+    "- As variáveis V1-V28, por serem componentes de PCA, apresentam correlação praticamente nula entre si, como esperado.\n",
+    "- Algumas variáveis (ex.: V17, V14, V12, V10 negativamente, e V11, V4 positivamente — os valores exatos serão observados na execução) tendem a apresentar correlação mais forte com `Class`, sinalizando maior poder discriminante para o modelo.\n",
+    "- `Amount` e `Time` apresentam correlação fraca com `Class`, mas ainda assim serão normalizadas/tratadas na etapa de preparação dos dados (parte da Anna), já que estão em escalas muito diferentes das variáveis V1-V28."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python",
+   "version": "3.11"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
