@@ -1,2 +1,3 @@
 dataset/*.csv
 notebooks/*_prepared.csv
+notebooks/creditcard.csv
