@@ -28,25 +28,41 @@ Trata-se de um problema de classificação binária fortemente desbalanceado: a 
 
 ```
 ├── README.md
+├── requirements.txt
 ├── relatorio/
-│   └── relatorio_projeto.pdf        # Relatório do projeto (template da disciplina)
+│   └── relatorio_projeto.pdf          # Relatório do projeto (template da disciplina)
 ├── dataset/
-│   └── creditcard.csv               # Dataset (baixar do Kaggle — não versionado)
-└── notebooks/
-    ├── preparacao_dados.ipynb       # Preparação dos dados (Anna Julia)
-    ├── analise_exploratoria_1.ipynb # Análise exploratória — parte 1 (Eduarda)
-    └── analise_exploratoria_2.ipynb # Análise exploratória — parte 2 (Sara)
+│   └── creditcard.csv                 # Dataset (baixar do Kaggle — não versionado)
+├── notebooks/
+│   ├── analise_exploratoria_1.ipynb   # 1. EDA: describe, nulos, duplicatas, desbalanceamento (Eduarda)
+│   ├── analise_exploratoria_2.ipynb   # 2. EDA: histogramas Amount/Time, correlação (Sara)
+│   ├── preparacao_dados.ipynb         # 3. Preparação: duplicatas, split, normalização, SMOTE (Anna Julia)
+│   └── modelagem.ipynb                # 4. Modelagem, avaliação e resultados (N2)
+└── resultados/                        # Tabelas (.csv) e gráficos (.png) gerados pela modelagem
 ```
 
 ## Como executar
 
 1. Clone o repositório.
 2. Baixe o `creditcard.csv` no [Kaggle](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) e salve em `dataset/`.
-3. Instale as dependências:
-   ```
-   pip install pandas numpy scikit-learn imbalanced-learn matplotlib
-   ```
-4. Execute os notebooks na pasta `notebooks/`, na ordem indicada acima.
+3. Instale as dependências: `pip install -r requirements.txt`
+4. Execute os notebooks da pasta `notebooks/` na ordem numerada acima. O `modelagem.ipynb` leva de 5 a 10 minutos.
+
+## Resultados (conjunto de teste)
+
+| Modelo | Precisão | Recall | F1 | AUPRC |
+|---|---|---|---|---|
+| Baseline (sempre "legítima") | 0,000 | 0,000 | 0,000 | 0,002 |
+| Regressão Logística (class_weight) | 0,051 | 0,874 | 0,096 | 0,692 |
+| Random Forest (SMOTE) | 0,913 | 0,768 | 0,834 | 0,810 |
+| XGBoost (class_weight) | 0,913 | 0,768 | 0,834 | 0,810 |
+| **XGBoost ajustado + limiar 0,73 (final)** | **0,973** | **0,758** | **0,852** | **0,834** |
+
+O modelo final detectou **72 das 95 fraudes** do teste, com apenas **2 falsos positivos** em 56.651 transações legítimas. Validação cruzada (5 folds): AUPRC = 0,852 ± 0,029. Detalhes em `notebooks/modelagem.ipynb` e `resultados/`.
+
+## Links
+
+- **Vídeo de apresentação (YouTube):** _[inserir link]_
 
 ## Descrição do Problema
 
@@ -59,8 +75,10 @@ Usar IA pra detectar fraude é útil, mas também traz alguns pontos que valem a
 ## Metodologia (resumo)
 
 1. Análise exploratória dos dados (distribuição das classes, correlações, histogramas).
-2. Preparação dos dados: normalização de `Amount` e `Time`, divisão treino/teste estratificada e tratamento do desbalanceamento com SMOTE.
-3. Treinamento e avaliação de modelos de classificação (Regressão Logística, Random Forest e/ou XGBoost), com foco em métricas adequadas a dados desbalanceados — AUPRC, precisão e recall.
+2. Preparação: remoção de duplicatas, divisão treino/validação/teste (60/20/20) estratificada e normalização de `Amount` e `Time`, ajustada só no treino.
+3. Comparação de Regressão Logística, Random Forest e XGBoost, cada um com SMOTE e com `class_weight`, usando *pipelines* (`imblearn`) para evitar vazamento de dados.
+4. Ajuste de hiperparâmetros do XGBoost (`RandomizedSearchCV`, otimizando AUPRC), escolha do limiar de decisão por F2 (prioriza recall) e avaliação final no teste.
+5. Interpretação (importância das variáveis) e validação cruzada estratificada de 5 *folds* para verificar a estabilidade.
 
 ## Aspectos éticos
 
