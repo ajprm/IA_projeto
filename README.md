@@ -62,7 +62,7 @@ O modelo final detectou **72 das 95 fraudes** do teste, com apenas **2 falsos po
 
 ## Links
 
-- **Vídeo de apresentação (YouTube):** _[inserir link]_
+- **Vídeo de apresentação (YouTube):** https://www.youtube.com/watch?v=05vBYaSYGaE
 
 ## Descrição do Problema
 
